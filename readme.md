@@ -14,7 +14,7 @@ Currently working:
     make sure that line chart will take data directly from code ignoring CSV file.
     change price download file
 
-#ProjectCh 0.0.2
+# ProjectCh 0.0.2
 In this version I added live updates on pie chart, that shows current supply and demand ratio from market.
 RSS feed from investing.com ( need to change it, we only have excess to topics.)
 There also is new version of line chart that displays BOLL incicator and prices in last 24h.
@@ -27,7 +27,7 @@ future plans (most likely will not be added in next version of the file):
     find better RSS feed which will give me more information that current one.
     Add your own API Key. (currently using my API Key from Code. I want to change it)
     make trading possible from the platform, without going to the original site.
-#ProjectCh 0.0.3
+# ProjectCh 0.0.3
 In this version i updated both RSS links, but most importand is that i was able to addit real time text. currently with
 this method i am traking price and supply and demand weighted average prices.
 had to change max number of RSS Mannually in rss.py. did not understand reason for the error, because max number of rss was same for both links,
@@ -39,7 +39,7 @@ Currently working:
 Future plans did not change from last time except I would like to add analysis in the platform.
 Main priority is to make sure, that i will not need to resart code in order to see updates.
 
-#ProjectCh 0.0.4
+# ProjectCh 0.0.4
 Ok this update was faster than I expected. Main changes were mostly cosmetic:
 1)I made main chart Bigger. now it takes whole page rather than some parts of it.
 2)Changed background color and font color for both graphs and text.
@@ -60,7 +60,7 @@ future plans (I will stop mentioning long term plans as long as those plans rema
     Add your own API Key. (currently using my API Key from Code. I want to change it)
     make trading possible from the platform, without going to the original site.
     make practical layout current layout works perfect for work-in-progress, but it will be needed to change for external use.
-#ProjectCh 0.0.5
+# ProjectCh 0.0.5
 life update of the table was added in this version of the file. I no longer will need to restart my code in order to get updated information on my platfrom.
 WORK-IN-PROGRESS
 
