@@ -22,7 +22,7 @@ There also is new version of line chart that displays BOLL incicator and prices 
 
 Currently working:
 
-live update on RSS \n
+live update on RSS
 live update of the lates price in text format.
 
 future plans (most likely will not be added in next version of the file):
