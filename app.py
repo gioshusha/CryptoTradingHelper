@@ -5,7 +5,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import constants
 import rss
-import plotly.graph_objects as go
+from plotly import graph_objs as go
 import supply
 import ImportPrices
 
@@ -124,7 +124,7 @@ def update_graph_live2(n):
     clrs = ['rgb(0, 255, 0)','rgb(255, 0, 0)']
     fig = {
         'data': [
-            go.Pie(labels=lbls, values=vlus,marker_colors=clrs)
+            go.Pie(labels=lbls, values=vlus)
         ],
         'layout': {
                 'plot_bgcolor': colors['background'],
