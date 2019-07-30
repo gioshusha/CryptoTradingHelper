@@ -5,7 +5,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import constants
 import rss
-from plotly import graph_objs as go
+import plotly.graph_objects as go
 import supply
 import ImportPrices
 
@@ -39,7 +39,18 @@ app.layout = html.Div(children=[
     #title
     html.H1(children='Platform'),
     #dropdown Manu for selecting cryptocurrency
-
+    dcc.Dropdown(
+        id='CryptoChose',
+        options=[
+            {'label': 'ETH', 'value': 'ETHUSDT'},
+            {'label': 'BTC', 'value': 'BTCUSDT'},
+            {'label': 'XRP', 'value': 'XRPUSDT'},
+            {'label': 'PAX', 'value': 'PAXUSDT'}
+        ],
+        style={'height': '15px','width': '150px','margin-bottom':'18px'},
+        value='ETHUSDT',
+        clearable=False
+    ),
     #live update graph line graph
     html.Div([
         dcc.Graph(id='update_graph_live'),
@@ -94,9 +105,10 @@ app.layout = html.Div(children=[
 
 #live updates for supply
 @app.callback(Output('update_graph_live', 'figure'),
-              [Input('interval-component', 'n_intervals')])
-def update_graph_live(n):
-    df = ImportPrices.df(constants.cr)
+              [Input('interval-component', 'n_intervals')],
+              [dash.dependencies.State('CryptoChose', 'value')])
+def update_graph_live(n,value):
+    df = ImportPrices.df(value)
     fig = {
         'data': [
             {'x': df["Date"], 'y': df["Price"], 'type': 'line','mode':'lines+markers', 'name': "Price"},
@@ -105,7 +117,7 @@ def update_graph_live(n):
             {'x': df["Date"], 'y': df["Bollmax"], 'type': 'line', 'name': "BOLL high"}
         ],
         'layout': {
-            'title': constants.cr,
+            'title': value,
             'plot_bgcolor': colors['background'],
                 'paper_bgcolor': colors['background'],
                 'font': {
@@ -116,15 +128,16 @@ def update_graph_live(n):
     return fig
 
 @app.callback(Output('update_graph_live2', 'figure'),
-              [Input('interval-component2', 'n_intervals')])
-def update_graph_live2(n):
-    supplydata = supply.loadData(constants.cr)
+              [Input('interval-component2', 'n_intervals')],
+              [dash.dependencies.State('CryptoChose', 'value')])
+def update_graph_live2(n,value):
+    supplydata = supply.loadData(value)
     lbls = ['Want To Buy','Want To Sell']
     vlus = [supplydata[0],supplydata[1]]
     clrs = ['rgb(0, 255, 0)','rgb(255, 0, 0)']
     fig = {
         'data': [
-            go.Pie(labels=lbls, values=vlus)
+            go.Pie(labels=lbls, values=vlus,marker_colors=clrs)
         ],
         'layout': {
                 'plot_bgcolor': colors['background'],
@@ -139,18 +152,20 @@ def update_graph_live2(n):
 
 #live price update
 @app.callback(Output('PriceLive', 'children'),
-              [Input('interval-component3', 'n_intervals')])
-def PriceLive(n):
-    PriceData = ImportPrices.df(constants.cr)
+              [Input('interval-component3', 'n_intervals')],
+              [dash.dependencies.State('CryptoChose', 'value')])
+def PriceLive(n,value):
+    PriceData = ImportPrices.df(value)
     return "Price: " + str(PriceData["Price"][0]) + " Change last 24H: " + str(round(PriceData["Price"][0]/PriceData["Price"][23]*100,2)) + "%"
 
 
 #get Live Supply and demand prices
 @app.callback(Output('SupplyUpdate', 'children'),
-              [Input('interval-component4', 'n_intervals')])
-def PriceLive(n):
-    supplydata = supply.loadData(constants.cr)
-    return " Want To Buy: " + str(round(supplydata[2],2)) + " Want To Sell: " + str(round(supplydata[3],4))
+              [Input('interval-component4', 'n_intervals')],
+              [dash.dependencies.State('CryptoChose', 'value')])
+def PriceLive(n,value):
+    supplydata = supply.loadData(value)
+    return " Want To Buy: " + str(round(supplydata[2],4)) + " Want To Sell: " + str(round(supplydata[3],4))
 
 #RSS table update
 @app.callback(Output('RSSupdate', 'children'),

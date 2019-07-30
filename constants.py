@@ -1,4 +1,4 @@
-NUMBER = 24
+NUMBER = 48
 NUMBER2 = NUMBER + 48
 Timeframe = "3 day ago UTC"
 cr = "ETHUSDT"
