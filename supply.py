@@ -55,8 +55,31 @@ def loadData(cr):
   asks = sum3 / sum4
   total = (bids + asks)/2
   df = []
-  df.append(round(sum1,2))
-  df.append(round(sum3,2))
-  df.append(round(bids,2))
-  df.append(round(asks,2))
+  df.append(round(sum1,4))
+  df.append(round(sum3,4))
+  df.append(round(bids,4))
+  df.append(round(asks,4))
   return df
+
+def LoadDetailedData(cr):
+    depth = client.get_order_book(symbol=cr)
+    PriceBids = []
+    VolumeBids = []
+    x = 0
+    while len(depth["bids"])>x:
+        PriceBids.append(float(depth["bids"][x][0]))
+        VolumeBids.append(float(depth["bids"][x][1]))
+        x = x + 1
+    PriceAsks = []
+    VolumeAsks = []
+    x = 0
+    while len(depth["asks"])>x:
+        PriceAsks.append(float(depth["asks"][x][0]))
+        VolumeAsks.append(float(depth["asks"][x][1]))
+        x = x + 1
+    Data = {"PriceBids":PriceBids,
+            "VolumeBids":VolumeBids,
+            "PriceAsks":PriceAsks,
+            "VolumeAsks":VolumeAsks}
+    df = pd.DataFrame(Data)
+    return df

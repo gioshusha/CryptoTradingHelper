@@ -25,7 +25,7 @@ def df(cr):
             AverageH_1 = AverageH_1 + float(float(klines[len(klines) - x - 1 - y][4]))
             STDEVH_1.append(float(float(klines[len(klines) - x - 1 - y][4])))
             y = y + 1
-        AverageH.append(round(AverageH_1/24,2))
+        AverageH.append(round(AverageH_1/24,5))
         STDEVHmin.append(round(AverageH_1/24,2) - (statistics.stdev(STDEVH_1)*2))
         STDEVHmax.append(round(AverageH_1/24,2) + (statistics.stdev(STDEVH_1)*2))
         x = x + 1
