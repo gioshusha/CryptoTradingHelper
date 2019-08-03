@@ -85,9 +85,6 @@ Finaly basic working module is ready. This will be the project number for the re
 From now on i will be working on additional features and modifing already existing ones for better usage.
 
 #ProjectCh 0.1.1
-
-Finally I was able to put back all work that required app to work (see previous version).
-Now i can focus on adding additional features, that will allow me to improve productiveness of the app.
 In this version I added:
     Real Time traded Volume as second extension of the Pie Chart (Still Do not know selling amount for Takers.)
     New class that gives me historical traded values. I do not use it for graphs, but it will be easier if i will ever use it again.
@@ -97,3 +94,25 @@ endpoint and how i was going to destribut it, also Volume.py was changed at leas
 Working for next Version:
     I will be focusing on order book data analysis. I do not think current information is enough to make edducated desicion.
     I will also be focusing on price developement analysis.
+
+
+
+#ProjectCh 0.1.1
+
+Ok this is stange. mostly i worked on improving already existing features of the app and ended up completly revorking buy sell information. so basicly i undid
+everything from last version of the file and reworked everything from the scratch. not that i am compaining now it looks much better and user
+does not need to do pointless adjustments in order to get the infromation. secondly I added history of volume for buy and sell. it in theory will give user
+(Or in this case me :)) some depth to work with.
+
+I was thinking about this app when i finished working on the final version which took me 10x more time then i would have liked and adding more graphs does not make any
+kind of sence for me. for now it is easy to read and user does not have to do 1000 useless actions to get simple data. I would like to keep it as simple
+as possible at least for the future. (Lets see how i will be able to do it considering how much data i would like to add to the app.)
+
+Therefore I think i will continue working on simplification of the data. so i will stop adding new graphs for now and focus on better chart types/quality for already
+existing features.
+
+#ProjectCT 0.1.2
+First change that i made in the code is BOLL calculation for small amounts. turns out i had little bit mistake with regards to small numbers. now it will be working,
+But not with too small amounts.
+I also changed PAX to XRP. i do not think having pax here will change anything. XRP should be more usufull.
+Currntly platform is tested on: BTCUSDT, ETHUSDT, XRPUSDT, BNBUSDT.

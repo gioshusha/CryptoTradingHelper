@@ -1,12 +1,15 @@
+#dash imports
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-import pandas as pd
-import constants
-import rss
 import plotly.graph_objects as go
 import plotly.express as px
+#external imports
+import pandas as pd
+#internal imports (I am tring to seperate code as much as possible)
+import constants
+import rss
 import supply
 import ImportPrices
 import Volume
@@ -39,7 +42,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 #main body of dash.py
 app.layout = html.Div(children=[
     #title
-    html.H1(children='Platform'),
+    html.H1(children='ProjectCH'),
     #dropdown Manu for selecting cryptocurrency
     dcc.Dropdown(
         id='CryptoChose',
@@ -47,17 +50,25 @@ app.layout = html.Div(children=[
             {'label': 'ETH', 'value': 'ETHUSDT'},
             {'label': 'BTC', 'value': 'BTCUSDT'},
             {'label': 'BNB', 'value': 'BNBUSDT'},
-            {'label': 'PAX', 'value': 'PAXUSDT'}
+            {'label': 'XPR', 'value': 'XRPUSDT'}
         ],
         style={'height': '15px','width': '150px','margin-bottom':'18px'},
         value='ETHUSDT',
         clearable=False
     ),
-    #live update graph line graph
+    #MAIN GRAPH PART1 live update graph line graph
     html.Div([
-        dcc.Graph(id='update_graph_live'),
+        dcc.Graph(id='update_graph_live',style={'height':450}),
         dcc.Interval(
             id='interval-component2',
+            interval=constants.fastIntervals, # in milliseconds
+            n_intervals=1
+        )]),
+    #MAIN GRAPH PART2 live update for volume
+    html.Div([
+        dcc.Graph(id='Update_Volume_Graph',style={'height':300}),
+        dcc.Interval(
+            id='internal-volume-graph',
             interval=constants.fastIntervals, # in milliseconds
             n_intervals=1
         )]),
@@ -69,17 +80,6 @@ app.layout = html.Div(children=[
             interval=constants.fastIntervals, # in milliseconds
             n_intervals=1
     )]),
-    #select pie chart type
-    dcc.Dropdown(
-        id='ChartChose',
-        options=[
-            {'label': 'Order Book', 'value': 'OrderBook'},
-            {'label': 'Traded amount', 'value': 'Vol'}
-        ],
-        style={'height': '15px','width': '200px','margin-bottom':'18px'},
-        value='OrderBook',
-        clearable=False
-    ),
     #information about supply and demand
     html.Div([
         html.H4(id='SupplyUpdate'),
@@ -115,7 +115,7 @@ app.layout = html.Div(children=[
         'background':colors['background']
         })
 
-#live updates for supply
+#MAIN GRAPH UPDATE: live updates for Line Grahp.
 @app.callback(Output('update_graph_live', 'figure'),
               [Input('interval-component', 'n_intervals')],
               [dash.dependencies.State('CryptoChose', 'value')])
@@ -126,7 +126,7 @@ def update_graph_live(n,value):
             {'x': df["Date"], 'y': df["Price"], 'type': 'line','mode':'lines+markers', 'name': "Price"},
             {'x': df["Date"], 'y': df["Average"], 'type': 'line', 'name': "24H Average"},
             {'x': df["Date"], 'y': df["Bollmin"], 'type': 'line', 'name': "BOLL low"},
-            {'x': df["Date"], 'y': df["Bollmax"], 'type': 'line', 'name': "BOLL high"}
+            {'x': df["Date"], 'y': df["Bollmax"], 'type': 'line', 'name': "BOLL high"},
         ],
         'layout': {
             'title': value,
@@ -138,48 +138,51 @@ def update_graph_live(n,value):
         }
     }
     return fig
+#Volume Graph Update
+@app.callback(Output('Update_Volume_Graph', 'figure'),
+              [Input('internal-volume-graph', 'n_intervals')],
+              [dash.dependencies.State('CryptoChose', 'value')])
+def Update_Volume_Graph(n,value):
+    df = Volume.GetVolume(value)
+    fig = {
+        'data': [
+            go.Bar(name='Volume Buy',x = df["Date"], y=df["Buy"],marker_color='rgb(0, 255, 0)'),
+            go.Bar(name='Volume Sell',x = df["Date"], y=df["Sell"],marker_color='rgb(255, 0, 0)')
+        ],
+        'layout': {
+            'plot_bgcolor': colors['background'],
+            'paper_bgcolor': colors['background'],
+            'font': {
+                'color': colors['text']
+                },
+            'barmode':'stack'
+        },
+    }
 
+    return fig
+#Order Book Update
 @app.callback(Output('update_graph_live2', 'figure'),
               [Input('interval-component2', 'n_intervals')],
-              [State('CryptoChose', 'value'),
-              State('ChartChose', 'value')])
-def update_graph_live2(n,crypto,chart):
-    if chart == "Vol":
-        vol = Volume.GetVolume(crypto)
-        lbls = ['Taker Buy','Taker Sell']
-        vlus = [vol['Buy'][0],vol['Sell'][0]]
-        clrs = ['rgb(0, 255, 0)','rgb(255, 0, 0)']
-        fig = {
-            'data': [
-                go.Pie(labels=lbls, values=vlus,marker_colors=clrs)
-            ],
-            'layout': {
-                    'plot_bgcolor': colors['background'],
-                    'paper_bgcolor': colors['background'],
-                    'font': {
-                        'color': colors['text']
-                        }
-            }
+              [State('CryptoChose', 'value')])
+def update_graph_live2(n,crypto):
+    supplydata = supply.loadData(crypto)
+    lbls = ['Want To Buy','Want To Sell']
+    vlus = [supplydata[0],supplydata[1]]
+    clrs = ['rgb(0, 255, 0)','rgb(255, 0, 0)']
+    fig = {
+        'data': [
+            go.Pie(labels=lbls, values=vlus,marker_colors=clrs)
+        ],
+        'layout': {
+                'plot_bgcolor': colors['background'],
+                'paper_bgcolor': colors['background'],
+                'font': {
+                    'color': colors['text']
+                    }
         }
-        return fig
-    elif chart == "OrderBook":
-        supplydata = supply.loadData(crypto)
-        lbls = ['Want To Buy','Want To Sell']
-        vlus = [supplydata[0],supplydata[1]]
-        clrs = ['rgb(0, 255, 0)','rgb(255, 0, 0)']
-        fig = {
-            'data': [
-                go.Pie(labels=lbls, values=vlus,marker_colors=clrs)
-            ],
-            'layout': {
-                    'plot_bgcolor': colors['background'],
-                    'paper_bgcolor': colors['background'],
-                    'font': {
-                        'color': colors['text']
-                        }
-            }
-        }
-        return fig
+    }
+    return fig
+# functions start here mostly live update functions.:
 #live price update
 @app.callback(Output('PriceLive', 'children'),
               [Input('interval-component3', 'n_intervals')],
@@ -215,4 +218,4 @@ def RSSupdate(n):
 
 #start app
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True,host='0.0.0.0',port = 8080)

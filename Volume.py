@@ -13,17 +13,20 @@ def GetVolume(cr):
     helper1 = []
     helper2 = []
     helper3 = []
+    helper5 = []
 
     for tr in trades:
         helper0.append(tr)
     x = 0
     while x < constants.NUMBER:
+        helper5.append(pd.to_datetime(float(trades[len(trades) - x - 1][0]), unit='ms').to_pydatetime())
         helper1.append(round(float(helper0[len(helper0) - 1 - x][9]),2))
         helper2.append(round(float(helper0[len(helper0) - 1 - x][5]),2))
         helper3.append(round(float(helper0[len(helper0) - 1 - x][5]),2) - round(float(helper0[len(helper0) - 1 - x][9]),2))
         x = x + 1
 
-    Data = {"Buy":helper1,
+    Data = {"Date":helper5,
+            "Buy":helper1,
             "Sell":helper3,
             "Total":helper2,}
     df = pd.DataFrame(Data)
