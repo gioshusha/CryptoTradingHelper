@@ -116,3 +116,26 @@ First change that i made in the code is BOLL calculation for small amounts. turn
 But not with too small amounts.
 I also changed PAX to XRP. i do not think having pax here will change anything. XRP should be more usufull.
 Currntly platform is tested on: BTCUSDT, ETHUSDT, XRPUSDT, BNBUSDT.
+
+I was finally able to combine both volume and price charts but it is supper slow.
+I think i will need to redesigne how i am getting columes for my calculations. (I do not know how yet)
+as far as chart goes it lookes nicer than the previous version time to work on productivity of the chart.
+
+UPDATE. chart in most cases works and is much more understandeble than in prevous versions.
+I discontinued additional code for getting Volumes and combines it in ImportPrices.py.
+Porgram is much more efficient, but promble continues: Starting the applications takes few minutes, sometimes more and in rare cases reloading.(which is annoying.)
+I think problems come from dash charts itself.
+I added server time as clock. (need to work on how i will show it.)
+
+In the future i think i will work on stand alone Web application and start ignoring dash completly. Three charts and it already has too much performance issues for my taste.
+Last hope is that dash can not work with current date format and i will try to modify it.
+
+Finally solved performance issue. problem came how i was parsing data. i rounded it up in to hours, which hopefully make app work more smoothly.
+Transit between cryptos need roughly from 15 - 30 seconds. i think problem still lies in dash, but i will have a look at it after finishing all features.
+
+Summery:
+    No major change was made in this update, at  least on the surface.
+    Bug fixes on performance issues.
+    More efficient way to get infromation.
+
+#ProjectCT 0.1.3

@@ -14,10 +14,17 @@ def df(cr):
     AverageH = []
     STDEVHmin = []
     STDEVHmax = []
+    volumeBuy = []
+    volumeSell = []
+    Diff=[]
+
 
     while x < constants.NUMBER:
-        TimeH.append(pd.to_datetime(float(klines[len(klines) - x - 1][0]), unit='ms').to_pydatetime())
+        TimeH.append(pd.to_datetime(round(float(klines[len(klines) - x - 1][0])/1000/60/60,0), unit='h'))
+
         PriceH.append(float(klines[len(klines) - x - 1][4]))
+        volumeBuy.append(float(klines[len(klines) - x - 1][9]))
+        volumeSell.append(float(klines[len(klines) - x - 1][5])-float(klines[len(klines) - x - 1][9]))
         AverageH_1 = 0
         STDEVH_1 = []
         y = 0
@@ -26,14 +33,21 @@ def df(cr):
             STDEVH_1.append(float(float(klines[len(klines) - x - 1 - y][4])))
             y = y + 1
         AverageH.append(round(AverageH_1/24,5))
-        STDEVHmin.append(round(AverageH_1/24,2) - (statistics.stdev(STDEVH_1)*2))
-        STDEVHmax.append(round(AverageH_1/24,2) + (statistics.stdev(STDEVH_1)*2))
+        STDEVHmin.append(round(AverageH_1/24,5) - (statistics.stdev(STDEVH_1)*2))
+        STDEVHmax.append(round(AverageH_1/24,5) + (statistics.stdev(STDEVH_1)*2))
+        Diff.append(volumeBuy[x] - volumeSell[x])
         x = x + 1
+
+
     Data = {"Date":TimeH,
             "Price":PriceH,
             "Average":AverageH,
             "Bollmin":STDEVHmin,
-            "Bollmax":STDEVHmax}
+            "Bollmax":STDEVHmax,
+            "Buy":volumeBuy,
+            "Sell":volumeSell,
+            "Diff":Diff}
     df = pd.DataFrame(Data)
 
     return df
+#print(df("ETHUSDT"))

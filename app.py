@@ -5,6 +5,8 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import plotly.express as px
+import plotly.tools as tls
+from plotly.subplots import make_subplots
 #external imports
 import pandas as pd
 #internal imports (I am tring to seperate code as much as possible)
@@ -12,8 +14,7 @@ import constants
 import rss
 import supply
 import ImportPrices
-import Volume
-
+import Time
 #end imports
 #style modification:
 colors = {
@@ -22,8 +23,6 @@ colors = {
 }
 # styles provided by dash.plot.ly
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-#import prices from external library
-rssdata = rss.News()
 
 
 #generate table with information on cryptocurrency
@@ -43,6 +42,14 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.layout = html.Div(children=[
     #title
     html.H1(children='ProjectCH'),
+    #Server Time
+    html.Div([
+        html.H4(id='ServerTime'),
+        dcc.Interval(
+            id='SVTIME',
+            interval=constants.fastIntervals*60, # in milliseconds
+            n_intervals=1
+    )]),
     #dropdown Manu for selecting cryptocurrency
     dcc.Dropdown(
         id='CryptoChose',
@@ -56,19 +63,11 @@ app.layout = html.Div(children=[
         value='ETHUSDT',
         clearable=False
     ),
-    #MAIN GRAPH PART1 live update graph line graph
+    #MAIN GRAPH live update graph line graph
     html.Div([
-        dcc.Graph(id='update_graph_live',style={'height':450}),
+        dcc.Graph(id='update_graph_live',style={'height':600}),
         dcc.Interval(
             id='interval-component2',
-            interval=constants.fastIntervals, # in milliseconds
-            n_intervals=1
-        )]),
-    #MAIN GRAPH PART2 live update for volume
-    html.Div([
-        dcc.Graph(id='Update_Volume_Graph',style={'height':300}),
-        dcc.Interval(
-            id='internal-volume-graph',
             interval=constants.fastIntervals, # in milliseconds
             n_intervals=1
         )]),
@@ -121,35 +120,46 @@ app.layout = html.Div(children=[
               [dash.dependencies.State('CryptoChose', 'value')])
 def update_graph_live(n,value):
     df = ImportPrices.df(value)
-    fig = {
-        'data': [
-            {'x': df["Date"], 'y': df["Price"], 'type': 'line','mode':'lines+markers', 'name': "Price"},
-            {'x': df["Date"], 'y': df["Average"], 'type': 'line', 'name': "24H Average"},
-            {'x': df["Date"], 'y': df["Bollmin"], 'type': 'line', 'name': "BOLL low"},
-            {'x': df["Date"], 'y': df["Bollmax"], 'type': 'line', 'name': "BOLL high"},
-        ],
-        'layout': {
+    print("Trying to Update")
+    #create table
+    fig = make_subplots(rows=2, cols=1)
+    #price update
+    fig.append_trace(go.Scatter(
+        name='Price',
+        x=df["Date"],
+        y=df["Price"],
+        mode='lines+markers',
+    ), row=1, col=1)
+    fig.append_trace(go.Scatter(
+        name='Average',
+        x=df["Date"],
+        y=df["Average"],
+    ), row=1, col=1)
+    fig.append_trace(go.Scatter(
+        name='Bollmin',
+        x=df["Date"],
+        y=df["Bollmin"],
+    ), row=1, col=1)
+    fig.append_trace(go.Scatter(
+        name='Bollmax',
+        x=df["Date"],
+        y=df["Bollmax"],
+    ), row=1, col=1)
+    fig.append_trace(go.Bar(
+        name='Volume Buy',
+        x=df["Date"],
+        y=df["Buy"],
+        marker_color='rgb(0, 255, 0)'
+    ), row=2, col=1)
+    fig.append_trace(go.Bar(
+        name='Volume Buy',
+        x=df["Date"],
+        y=df["Sell"],
+        marker_color='rgb(255, 0, 0)'
+    ), row=2, col=1)
+    fig.update_layout(
+        {
             'title': value,
-            'plot_bgcolor': colors['background'],
-                'paper_bgcolor': colors['background'],
-                'font': {
-                    'color': colors['text']
-                    }
-        }
-    }
-    return fig
-#Volume Graph Update
-@app.callback(Output('Update_Volume_Graph', 'figure'),
-              [Input('internal-volume-graph', 'n_intervals')],
-              [dash.dependencies.State('CryptoChose', 'value')])
-def Update_Volume_Graph(n,value):
-    df = Volume.GetVolume(value)
-    fig = {
-        'data': [
-            go.Bar(name='Volume Buy',x = df["Date"], y=df["Buy"],marker_color='rgb(0, 255, 0)'),
-            go.Bar(name='Volume Sell',x = df["Date"], y=df["Sell"],marker_color='rgb(255, 0, 0)')
-        ],
-        'layout': {
             'plot_bgcolor': colors['background'],
             'paper_bgcolor': colors['background'],
             'font': {
@@ -157,9 +167,12 @@ def Update_Volume_Graph(n,value):
                 },
             'barmode':'stack'
         },
-    }
-
+        xaxis=dict(showgrid=False),
+        yaxis=dict(showgrid=False)
+    )
     return fig
+
+
 #Order Book Update
 @app.callback(Output('update_graph_live2', 'figure'),
               [Input('interval-component2', 'n_intervals')],
@@ -205,7 +218,7 @@ def PriceLive(n,value):
               [Input('interval-component5', 'n_intervals')])
 def RSSupdate(n):
     dataframe = rss.News()
-    max_rows = 5
+    max_rows = 10
     return html.Table(
         # Header
         [html.Tr([html.Th(col) for col in dataframe.columns])] +
@@ -216,6 +229,14 @@ def RSSupdate(n):
         ]) for i in range(min(len(dataframe), max_rows))]
     )
 
+
+#Live Update Of Time
+@app.callback(Output('ServerTime', 'children'),
+              [Input('SVTIME', 'n_intervals')])
+def ServerTime(n):
+    time = Time.getServerTime()
+    return time
+
+#get Live Supply and demand prices
 #start app
 if __name__ == '__main__':
-    app.run_server(debug=True,host='0.0.0.0',port = 8080)
